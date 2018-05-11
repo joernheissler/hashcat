@@ -97,6 +97,8 @@ void goodbye_screen (hashcat_ctx_t *hashcat_ctx, const time_t proc_start, const 
 
 int setup_console ()
 {
+    setlinebuf(stdout);
+
   #if defined (_WIN)
   SetConsoleWindowSize (132);
 
