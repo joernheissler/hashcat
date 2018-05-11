@@ -296,37 +296,6 @@ DECLSPEC void m00000s (u32 w[16], const u32 pw_len, __global pw_t *pws, __global
   };
 
   /**
-   * reverse
-   */
-
-  u32 a_rev = digests_buf[digests_offset].digest_buf[0];
-  u32 b_rev = digests_buf[digests_offset].digest_buf[1];
-  u32 c_rev = digests_buf[digests_offset].digest_buf[2];
-  u32 d_rev = digests_buf[digests_offset].digest_buf[3];
-
-  MD5_STEP_REV (MD5_I_S, b_rev, c_rev, d_rev, a_rev, w[ 9], MD5C3f, MD5S33);
-  MD5_STEP_REV (MD5_I_S, c_rev, d_rev, a_rev, b_rev, w[ 2], MD5C3e, MD5S32);
-  MD5_STEP_REV (MD5_I_S, d_rev, a_rev, b_rev, c_rev, w[11], MD5C3d, MD5S31);
-  MD5_STEP_REV (MD5_I_S, a_rev, b_rev, c_rev, d_rev, w[ 4], MD5C3c, MD5S30);
-  MD5_STEP_REV (MD5_I_S, b_rev, c_rev, d_rev, a_rev, w[13], MD5C3b, MD5S33);
-  MD5_STEP_REV (MD5_I_S, c_rev, d_rev, a_rev, b_rev, w[ 6], MD5C3a, MD5S32);
-  MD5_STEP_REV (MD5_I_S, d_rev, a_rev, b_rev, c_rev, w[15], MD5C39, MD5S31);
-  MD5_STEP_REV (MD5_I_S, a_rev, b_rev, c_rev, d_rev, w[ 8], MD5C38, MD5S30);
-  MD5_STEP_REV (MD5_I_S, b_rev, c_rev, d_rev, a_rev, w[ 1], MD5C37, MD5S33);
-  MD5_STEP_REV (MD5_I_S, c_rev, d_rev, a_rev, b_rev, w[10], MD5C36, MD5S32);
-  MD5_STEP_REV (MD5_I_S, d_rev, a_rev, b_rev, c_rev, w[ 3], MD5C35, MD5S31);
-  MD5_STEP_REV (MD5_I_S, a_rev, b_rev, c_rev, d_rev, w[12], MD5C34, MD5S30);
-  MD5_STEP_REV (MD5_I_S, b_rev, c_rev, d_rev, a_rev, w[ 5], MD5C33, MD5S33);
-  MD5_STEP_REV (MD5_I_S, c_rev, d_rev, a_rev, b_rev, w[14], MD5C32, MD5S32);
-  MD5_STEP_REV (MD5_I_S, d_rev, a_rev, b_rev, c_rev, w[ 7], MD5C31, MD5S31);
-  MD5_STEP_REV (MD5_I_S, a_rev, b_rev, c_rev, d_rev,     0, MD5C30, MD5S30);
-
-  const u32 pre_cd = c_rev ^ d_rev;
-
-  MD5_STEP_REV1(MD5_H_S, b_rev, c_rev, d_rev, a_rev, w[ 2], MD5C2f, MD5S23);
-  MD5_STEP_REV1(MD5_H_S, c_rev, d_rev, a_rev, b_rev, w[15], MD5C2e, MD5S22);
-
-  /**
    * loop
    */
 
@@ -337,11 +306,6 @@ DECLSPEC void m00000s (u32 w[16], const u32 pw_len, __global pw_t *pws, __global
     const u32x w0r = words_buf_r[il_pos / VECT_SIZE];
 
     const u32x w0 = w0l | w0r;
-
-    const u32x pre_d = d_rev;
-    const u32x pre_a = a_rev - w0;
-    const u32x pre_b = b_rev - (pre_a ^ pre_cd);
-    const u32x pre_c = c_rev - (pre_a ^ pre_b ^ pre_d);
 
     u32x a = MD5M_A;
     u32x b = MD5M_B;
@@ -395,15 +359,9 @@ DECLSPEC void m00000s (u32 w[16], const u32 pw_len, __global pw_t *pws, __global
     MD5_STEP0(MD5_H1, a, b, c, d,     H_wdc28, MD5S20);
     MD5_STEP (MD5_H2, d, a, b, c, w0, H_w0c29, MD5S21);
     MD5_STEP0(MD5_H1, c, d, a, b,     H_w3c2a, MD5S22);
-
-    if (MATCHES_NONE_VV (pre_c, c)) continue;
-
     MD5_STEP0(MD5_H2, b, c, d, a,     H_w6c2b, MD5S23);
     MD5_STEP0(MD5_H1, a, b, c, d,     H_w9c2c, MD5S20);
     MD5_STEP0(MD5_H2, d, a, b, c,     H_wcc2d, MD5S21);
-
-    if (MATCHES_NONE_VV (pre_d, d)) continue;
-
     MD5_STEP0(MD5_H1, c, d, a, b,     H_wfc2e, MD5S22);
     MD5_STEP0(MD5_H2, b, c, d, a,     H_w2c2f, MD5S23);
 
@@ -423,6 +381,16 @@ DECLSPEC void m00000s (u32 w[16], const u32 pw_len, __global pw_t *pws, __global
     MD5_STEP0(MD5_I , d, a, b, c,     I_wbc3d, MD5S31);
     MD5_STEP0(MD5_I , c, d, a, b,     I_w2c3e, MD5S32);
     MD5_STEP0(MD5_I , b, c, d, a,     I_w9c3f, MD5S33);
+
+    a += MD5M_A;
+    b += MD5M_B;
+    c += MD5M_C;
+    d += MD5M_D;
+
+    a &= 0x1f1f1f1f;
+    b &= 0x1f1f1f1f;
+    c &= 0x00001f1f;
+    d &= 0x00000000;
 
     COMPARE_S_SIMD (a, d, c, b);
   }

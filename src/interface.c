@@ -20847,7 +20847,6 @@ int hashconfig_init (hashcat_ctx_t *hashcat_ctx)
                  hashconfig->parse_func     = md5_parse_hash;
                  hashconfig->opti_type      = OPTI_TYPE_ZERO_BYTE
                                             | OPTI_TYPE_PRECOMPUTE_INIT
-                                            | OPTI_TYPE_PRECOMPUTE_MERKLE
                                             | OPTI_TYPE_MEET_IN_MIDDLE
                                             | OPTI_TYPE_EARLY_SKIP
                                             | OPTI_TYPE_NOT_ITERATED
@@ -20857,8 +20856,8 @@ int hashconfig_init (hashcat_ctx_t *hashcat_ctx)
                  hashconfig->dgst_pos1      = 3;
                  hashconfig->dgst_pos2      = 2;
                  hashconfig->dgst_pos3      = 1;
-                 hashconfig->st_hash        = ST_HASH_00000;
-                 hashconfig->st_pass        = ST_PASS_HASHCAT_PLAIN;
+                 hashconfig->st_hash        = NULL;
+                 hashconfig->st_pass        = NULL;
                  break;
 
     case    10:  hashconfig->hash_type      = HASH_TYPE_MD5;
@@ -22929,7 +22928,7 @@ int hashconfig_init (hashcat_ctx_t *hashcat_ctx)
                                             | OPTS_TYPE_PT_ADDBITS14;
                  hashconfig->kern_type      = KERN_TYPE_MD5H;
                  hashconfig->dgst_size      = DGST_SIZE_4_4; // originally DGST_SIZE_4_2
-                 hashconfig->parse_func     = md5half_parse_hash;
+                 hashconfig->parse_func     = md5_parse_hash;
                  hashconfig->opti_type      = OPTI_TYPE_ZERO_BYTE
                                             | OPTI_TYPE_RAW_HASH;
                  hashconfig->dgst_pos0      = 0;
